@@ -6,7 +6,14 @@ export const metadata: Metadata = {
   title: 'Login | Acme Dashboard',
 };
  
-export default function LoginPage() {
+export default async function LoginPage(props: {
+  searchParams?: Promise<{
+    callbackUrl?: string;
+  }>;
+}) {
+  const searchParams = await props.searchParams;
+  const callbackUrl = searchParams?.callbackUrl || '/dashboard';
+
   return (
     <main className="flex items-center justify-center md:h-screen">
       <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
@@ -15,7 +22,7 @@ export default function LoginPage() {
             <AcmeLogo />
           </div>
         </div>
-        <LoginForm />
+        <LoginForm callbackUrl={callbackUrl} />
       </div>
     </main>
   );

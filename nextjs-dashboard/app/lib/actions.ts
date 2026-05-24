@@ -37,7 +37,10 @@ export type State = {
 };
 
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(
+  prevState: State,
+  formData: FormData,
+): Promise<State> {
   // Validate form using Zod
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
@@ -77,42 +80,36 @@ export async function createInvoice(prevState: State, formData: FormData) {
 }
 
 export async function updateInvoice(id: string, formData: FormData) {
-    const rawFormData = UpdateIvnvoice.parse(Object.fromEntries(formData.entries()));
-    const amountInCents = rawFormData.amount * 100;
+  const rawFormData = UpdateInvoice.parse(Object.fromEntries(formData.entries()));
+  const amountInCents = rawFormData.amount * 100;
 
-    try {
-        await sql`
-        UPDATE invoices
-        SET customer_id = ${rawFormData.customerId},
-            amount = ${amountInCents},
-            status = ${rawFormData.status}
-        WHERE id = ${id}
-        `
-    } catch (error) {
-        return {
-            message: 'Something went wrong',
-        }
-    }
+  try {
+    await sql`
+      UPDATE invoices
+      SET customer_id = ${rawFormData.customerId},
+          amount = ${amountInCents},
+          status = ${rawFormData.status}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    throw new Error('Database Error: Failed to Update Invoice.');
+  }
 
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
-   
-    try {
-        await sql`
-        DELETE FROM invoices
-        WHERE id = ${id}
-        `
-    }catch (error) {
-        return {
-            message: 'Something went wrong',
-        }
-    }
+  try {
+    await sql`
+      DELETE FROM invoices
+      WHERE id = ${id}
+    `;
+  } catch (error) {
+    throw new Error('Database Error: Failed to Delete Invoice.');
+  }
 
-    revalidatePath('/dashboard/invoices');
-    // redirect('/dashboard/invoices');
+  revalidatePath('/dashboard/invoices');
 }
 
 export async function authenticate(
